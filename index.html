@@ -125,13 +125,29 @@ margin-bottom:8px;
 
 </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+
 <script>
 
-let pontosGabriel=Number(localStorage.getItem("gabriel"))||0;
+const firebaseConfig = {
+  apiKey: "AIzaSyDONRxj4nIuf74zORpizm_iX_u1mGvE-lI",
+  authDomain: "gabriel-e-maria-ee731.firebaseapp.com",
+  databaseURL: "https://gabriel-e-maria-ee731-default-rtdb.firebaseio.com",
+  projectId: "gabriel-e-maria-ee731",
+  storageBucket: "gabriel-e-maria-ee731.firebasestorage.app",
+  messagingSenderId: "132757616911",
+  appId: "1:132757616911:web:5916747ba5824a09b4e67a"
+};
 
-let pontosMaria=Number(localStorage.getItem("maria"))||0;
+firebase.initializeApp(firebaseConfig);
 
-let historico=JSON.parse(localStorage.getItem("historico"))||[];
+const db = firebase.database();
+const dados = db.ref("contador");
+  
+let pontosGabriel=0;
+let pontosMaria=0;
+let historico=[];
 
 function atualizar(){
 
@@ -139,11 +155,11 @@ document.getElementById("gabriel").innerHTML=pontosGabriel;
 
 document.getElementById("maria").innerHTML=pontosMaria;
 
-localStorage.setItem("gabriel",pontosGabriel);
-
-localStorage.setItem("maria",pontosMaria);
-
-localStorage.setItem("historico",JSON.stringify(historico));
+dados.set({
+  gabriel: pontosGabriel,
+  maria: pontosMaria,
+  historico: historico
+});
 
 let lista="";
 
@@ -161,10 +177,34 @@ function maisGabriel(){
 
 pontosGabriel++;
 
-atualizar();
+  dados.on("value", (snapshot) => {
+
+  const valor = snapshot.val();
+
+  if(valor){
+
+    pontosGabriel = valor.gabriel || 0;
+    pontosMaria = valor.maria || 0;
+    historico = valor.historico || [];
+
+  }
+
+  atualizar();
+
+});
 
 }
 
+function maisGabriel(){
+
+  pontosGabriel++;
+
+  atualizar();
+
+}
+
+
+  
 function menosGabriel(){
 
 if(pontosGabriel>0){
@@ -227,7 +267,32 @@ atualizar();
 
 }
 
-atualizar();
+dados.on("value", function(snapshot){
+
+  const valor = snapshot.val();
+
+  if(valor){
+
+    pontosGabriel = valor.gabriel || 0;
+    pontosMaria = valor.maria || 0;
+    historico = valor.historico || [];
+
+  }
+
+  document.getElementById("gabriel").innerHTML = pontosGabriel;
+  document.getElementById("maria").innerHTML = pontosMaria;
+
+  let lista="";
+
+  for(let i=historico.length-1;i>=0;i--){
+
+    lista+="<div class='item'>❤️ "+historico[i]+"</div>";
+
+  }
+
+  document.getElementById("historico").innerHTML=lista;
+
+});
 
 </script>
 
